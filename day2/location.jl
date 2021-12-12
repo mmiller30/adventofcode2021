@@ -7,9 +7,6 @@ function location_estimate(input)
     #create an Array offseting by the first integers (reduces the dim by 1)
     horizontal = 0
     depth = 0
-    forward = "forward"
-    down = "down"
-    up = "up"
     for i in 1:length(input[:,1])
         if input[i,1] == "forward"
             horizontal = horizontal + input[i,2]
