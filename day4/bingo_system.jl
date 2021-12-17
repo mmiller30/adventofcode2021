@@ -9,7 +9,7 @@ function sanitize_deck(input)
     draw_numbers = [parse(Int, ss) for ss in split(input[1],",")];
     
     #Isolate the bingo boards as a (5 x 5 x # of boards) matrix of integers
-    boards = zeros(Int8,5, 5,Int((length(input)-4)/5));
+    boards = zeros(Int8,5, 5,Int((length(input)-1)/6));
     board = zeros(Int8,5,5);
     n_boards = 1;
     for i in 3:6:length(input)
@@ -23,3 +23,4 @@ function sanitize_deck(input)
 
     return (boards, draw_numbers)
 end
+
