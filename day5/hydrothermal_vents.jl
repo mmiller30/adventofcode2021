@@ -20,11 +20,27 @@ function sanitize_input(input)
     return (paths)
 end
 
-function find_horizontal_vertical(input)
+function find_h_v_paths(input)
     paths = sanitize_input(input)
 
     for i = 1:length(paths[:,1])
-        if paths[i,1] != paths[i,3] && paths[i,2] != paths[i,4]
+        slope = abs((paths[i,4] - paths[i,2]) / (paths[i,3] - paths[i,1]))
+        if iszero(slope) || isinf(slope)
+            continue
+        else 
+            paths[i,:] .= NaN
+        end
+    end
+    return paths
+end
+
+function find_h_v_d_paths(input)
+    paths = sanitize_input(input)
+    for i = 1:length(paths[:,1])
+        slope = abs((paths[i,4] - paths[i,2]) / (paths[i,3] - paths[i,1]))
+        if iszero(slope) || isinf(slope) || isone(slope)
+            continue
+        else 
             paths[i,:] .= NaN
         end
     end
@@ -32,7 +48,7 @@ function find_horizontal_vertical(input)
 end
 
 function vent_count(input)
-    paths = find_horizontal_vertical(input)
+    paths = find_h_v_paths(input)
 
     paths = paths .+ 1 #shift values by one so that '0' index is '1'
     vent_map = zeros(Float64,1000,1000); #establish the map
@@ -65,15 +81,66 @@ function vent_count(input)
     return overlap_count
 end
 
+function vent_count_with_diagonal(input)
+    paths = find_h_v_d_paths(input)
+
+    paths = paths .+ 1 #shift values by one so that '0' index is '1'
+    vent_map = zeros(Float64,1000,1000); #establish the map
+    for i = 1:length(paths[:,1])
+        slope = abs((paths[i,4] - paths[i,2]) / (paths[i,3] - paths[i,1]))
+        if iszero(slope)
+            if paths[i,1] > paths[i,3]
+                x_dir = collect(Int,paths[i,3]:paths[i,1])
+            else
+                x_dir = collect(Int,paths[i,1]:paths[i,3])
+            end
+            y_dir = Int(paths[i,2]) 
+            for j = 1:length(x_dir)
+                vent_map[y_dir,x_dir[j]] = vent_map[y_dir,x_dir[j]] + 1
+            end
+        elseif isinf(slope) 
+            if paths[i,2] > paths[i,4]
+                y_dir = collect(Int,paths[i,4]:paths[i,2])
+            else
+                y_dir = collect(Int,paths[i,2]:paths[i,4])
+            end
+            x_dir = Int(paths[i,1])
+            for j = 1:length(y_dir)
+                vent_map[y_dir[j],x_dir] = vent_map[y_dir[j],x_dir] + 1
+            end
+        elseif isone(slope)
+            if paths[i,1] > paths[i,3]
+                x_dir = collect(Int,paths[i,3]:paths[i,1])
+                x_dir = reverse(x_dir)
+            else
+                x_dir = collect(Int,paths[i,1]:paths[i,3])
+            end
+            if paths[i,2] > paths[i,4]
+                y_dir = collect(Int,paths[i,4]:paths[i,2])
+                y_dir = reverse(y_dir)
+            else
+                y_dir = collect(Int,paths[i,2]:paths[i,4])
+            end
+            for j = 1:length(x_dir)
+                vent_map[y_dir[j],x_dir[j]] = vent_map[y_dir[j],x_dir[j]] + 1
+            end
+        end
+        #println(i)
+    end
+    indx = findall(x->x > 1, vent_map) #find all CartesianIndex values that match the draw number
+    overlap_count = length(indx) #replace all matching CartesianIndex with a 1
+    return overlap_count
+end
+
 function main()
     test_input =  readlines("day5_example.txt")
     main_input =  readlines("day5_input.txt")
   
     @assert vent_count(test_input) == 5
-    #@assert last_play_bingo(test_input) == 12
+    @assert vent_count_with_diagonal(test_input) == 12
   
     @show vent_count(main_input) # 7436
-    #@show last_play_bingo(main_input) # 1827 
+    @show vent_count_with_diagonal(main_input) # 21104 
 end
   
 @time main()
