@@ -19,12 +19,13 @@ function main()
     main_state =  readdlm("day6_input.txt", ',', Int)
 
     input = 80
-  
+    #input = 256
+
     @assert lanternfish_model(test_state, input)  == 5934
-    # @assert last_play_bingo(test_input) == 1924
+    # @assert lanternfish_model(test_state, input)  == 26984457539
   
-    @show lanternfish_model(main_state, input) # 360761
-    # @show last_play_bingo(main_input) # 1827 
+    # @show lanternfish_model(main_state, input) # 360761
+    # @show lanternfish_model(main_state, input) # 1827 
 end
   
 @time main()
