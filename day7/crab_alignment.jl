@@ -15,14 +15,25 @@ function crab_optimizer(input)
 end
 
 function crab_optimizer_part2(input)
-    input .+= 1 #shift the inputs by 1 to avoid 0 index
+    #input .+= 1 #shift the inputs by 1 to avoid 0 index
     maximum = findmax(input)
     minimum = findmin(input)
 
-    alignment = zeros(Int, minimum[1], maximum[1]) #create an empty array that is bounded by min and max distances
-
-    
-
+    alignment = zeros(Int, 1, maximum[1]) #create an empty array that is bounded by min and max distances
+    cost = zeros(Int, 1, length(input))
+    for i = 1:maximum[1]
+        for j = 1:length(input)
+            temp = cumsum(x for x in 1:abs(input[j]-i))
+            if length(temp) == 0 
+                cost[j] = 0
+            else
+                cost[j] = temp[end]
+            end
+        end
+        alignment[i] = sum(cost)
+    end
+    fuel = findmin(alignment)
+    return fuel[1]
 end
 
 function main()
@@ -32,8 +43,8 @@ function main()
     @assert crab_optimizer(test_state) == 37
     @assert crab_optimizer_part2(test_state)  == 168
   
-    @show crab_optimizer(main_state) # 360761
-    #@show lanternfish_model_xl(main_state, main_input) # 1632779838045 
+    @show crab_optimizer(main_state) # 349812
+    @show crab_optimizer_part2(main_state) # 99763899 
 end
   
 @time main()
